@@ -1,5 +1,5 @@
 # zephyr-galileo
-Zephyr reel board experiment
+Zephyr [reel board](https://github.com/zephyrproject-rtos/zephyr/wiki/reel-Board) programming adventure.
 
 ## Installing Prerequisites
 Follow the instructions available on [zephyr website](https://docs.zephyrproject.org/latest/guides/west/install.html).
@@ -21,7 +21,7 @@ reload the session by running `source ~/.bashrc`
 
 
 ## Connecting board to PC
-After installing west and zephyr sdk, connect your reel board to your computer using **MICRO-USB** cable. There are two usb slots on the board. One is nRF & the other is debug. You can read the board label to know which is slot is which. If there are no labels, face the front of the board (where there is a small disaplay screen), on your right, there will be two USB slots, the top slot is the debug slot.
+After installing west and zephyr sdk, connect your reel board to your computer using **MICRO-USB** cable. There are two usb slots on the board. One is nRF & the other is debug. You can read the [board label](https://github.com/zephyrproject-rtos/zephyr/wiki/reel-Board) to know which is slot is which. If there are no labels, face the front of the board (where there is a small disaplay screen), on your right, there will be two USB slots, the top slot is the debug slot.
 
 After connecting the board, flip the switch on the back of the board to **USB**. The switch is located between the two USB ports.
 
