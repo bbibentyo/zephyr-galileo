@@ -31,6 +31,12 @@ You should see the led light in the middle of the board blink, if all was succes
 
 You can repeat the process with another sample project. If you want to try writing something to board display, try *samples/display/cfb_custom_font* sample project.
 
+## Connecting to device to obtain output
+You can use serial connection to obtain print and other log messages from the board. 
+On Ubuntu, I use `tio` command which you can install using `sudo apt install tio`. Once installed check which port you device is connected in `/dev/ttyACM*`... On computer it is connected in `/dev/ttyACM1`.
+
+because the device is mounted with root account, run `sudo tio /dev/ttyACM1` and enter your password when prompted for one.
+
 ## Connecting to reel board using your android device.
 Using my android device (Galaxy S10),  I was able to connect to zephyr reel board via *Bluetooth*
 
