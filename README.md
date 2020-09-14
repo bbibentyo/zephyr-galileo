@@ -33,9 +33,11 @@ You can repeat the process with another sample project. If you want to try writi
 
 ## Connecting to device to obtain output
 You can use serial connection to obtain print and other log messages from the board. 
-On Ubuntu, I use `tio` command which you can install using `sudo apt install tio`. Once installed check which input your device is mounted to, by running `ls -l /dev/ttyACM*`... On my computer it is mounted to `/dev/ttyACM1`.
+On Ubuntu, I use `tio` command which you can install using `sudo apt install -y tio`. Once installed check which input your device is mounted to, by running `ls -l /dev/ttyACM*`... On my computer it is mounted to `/dev/ttyACM1`.
 
-because the device is mounted with root account, run `sudo tio /dev/ttyACM1` and enter your password when prompted for one.
+Because the device is mounted with root account, run `sudo tio /dev/ttyACM1` and enter your password when prompted for one. 
+
+Alternatively, you can use `cat` command to access the output, if you don't want to install another application. the full command is `sudo cat < /dev/ttyACM1` 
 
 ## Connecting to reel board using your android device.
 Using my android device (Galaxy S10),  I was able to connect to zephyr reel board via *Bluetooth*
