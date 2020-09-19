@@ -1,69 +1,77 @@
-#include <zephyr.h>
-#include <device.h>
-#include <display/cfb.h>
 #include <stdio.h>
+#include <zephyr.h>
+#include <sys/printk.h>
+#include <device.h>
+#include <drivers/sensor.h>
+#include <drivers/gpio.h>
 
-#if defined(CONFIG_SSD16XX)
-#define DISPLAY_DRIVER	"SSD16XX"
-#endif
+#include "display.h"
+// #include <lvgl.h>
 
-#ifndef DISPLAY_DRIVER 
-#define DISPLAY_DRIVER "DISPLAY"
-#endif
+#define TEMP_DEVICE_NAME "HDC1010"
+#define ACCE_DEVICE_NAME "MMA8652FC"
+#define DISP_DEVICE_NAME "SSD16XX"
+
 
 void main(void)
 {
-	const struct device *dev;
-	int err;
+	const struct device *temp_humidity_device;
+	const struct device *accelerometer_device;
+	const struct device *display_device;
 
-	uint16_t rows;
-	uint8_t ppt;
-	uint8_t font_width;
-	uint8_t font_height;
-	uint8_t display_width;
-	uint8_t display_columns;
-
-	dev = device_get_binding(DISPLAY_DRIVER);
-
-	if (dev == NULL) {
-		printf("device not found... aborting!\n");
+	temp_humidity_device = device_get_binding(TEMP_DEVICE_NAME);
+	if (temp_humidity_device == NULL) {
+		printk("Failed to initialize Temperature & Humidity device... aborting!\n");
 		return;
+	} else {
+		printk("Temperature and humidity device has been initialized\n");
 	}
 
-	printf("initialized %s\n", DISPLAY_DRIVER);
-
-	if (cfb_framebuffer_init(dev)) {
-		printf("Framebuffer initialization failed\n");
+	accelerometer_device = device_get_binding(ACCE_DEVICE_NAME);
+	if(accelerometer_device == NULL){
+		printk("Failed to initialize accelerometer device\n");
 		return;
+	} else {
+		printk("Accelerometer has been initialized to %s\n", ACCE_DEVICE_NAME);
 	}
 
-	cfb_framebuffer_clear(dev, true);
-	// display_blanking_off(dev);
-
-	rows = cfb_get_display_parameter(dev, CFB_DISPLAY_ROWS);  // on reel board value is set to 15
-	ppt = cfb_get_display_parameter(dev, CFB_DISPLAY_PPT);  // on reel board value is set to 8
-	display_width = cfb_get_display_parameter(dev, CFB_DISPLAY_WIDTH);  // on reel board value is set to 250
-	display_columns = cfb_get_display_parameter(dev, CFB_DISPLAY_COLS);  // on reel board value is set to 250
-
-	printf("width: %d, columns: %d, rows: %d, ppt: %d",
-			display_width, display_columns, rows, ppt);
-	char line[32];
-	int second_line;
-	int third_line;
-	const int MAX_LINE_LIMIT = (rows-2) * ppt;
+	display_device = device_get_binding(DISP_DEVICE_NAME);
+	if (display_device == NULL) {
+		printk("Failed to initialize display device");
+		return;
+	} else {
+		printk("Display device has been initialized... %s\n", DISP_DEVICE_NAME);
+		if (cfb_framebuffer_init(display_device)) {
+			printk("Framebuffer initialization failed\n");
+			return;
+		}
+		display_blanking_off(display_device);
+	}
+	
+	struct sensor_value temp;
+	struct sensor_value humidity;
+	struct sensor_value coord[3];
+	char name[] = "Boss Bibentyo";
 
 	while(1) {
-		for (int i = 0; i < rows-1; i++) {
-			cfb_framebuffer_clear(dev, false);
-			second_line = (i*ppt)+16;
-			third_line = (i*ppt)+32;
-			// snprintf(line, 20, "Row: %d - Pos: %d", i, i*ppt);
-			// TODO - Change text so that if we >= MAX (rows * ppt), we use modulus instead
-			cfb_print(dev, "Welcome Elikya", 0, i*ppt);
-			cfb_print(dev, "Welcome Nayah", 0, second_line);
-			cfb_print(dev, "Welcome Boss", 0, third_line);
-			cfb_framebuffer_finalize(dev);
-			k_sleep(K_MSEC(100));
-		}
+		printk("Fetching temperature & humidity...\n");
+		sensor_sample_fetch(temp_humidity_device);
+		sensor_channel_get(temp_humidity_device, SENSOR_CHAN_AMBIENT_TEMP, &temp);
+		sensor_channel_get(temp_humidity_device, SENSOR_CHAN_HUMIDITY, &humidity);
+
+		printk("Fetching accelerometer data...\n");
+		sensor_sample_fetch(accelerometer_device);
+		sensor_channel_get(accelerometer_device, SENSOR_CHAN_ACCEL_XYZ, coord);
+
+		cfb_framebuffer_clear(display_device, false);
+		
+		write_name_to_screen(display_device, name);
+		write_separator(display_device);
+		write_temp_to_screen(display_device, &temp);
+		write_humidity_to_screen(display_device, &humidity);
+		write_coordinates_to_screen(display_device, coord);
+		cfb_framebuffer_finalize(display_device);
+
+		k_sleep(K_SECONDS(15));
 	}
 }
