@@ -12,13 +12,12 @@
 #define ACCE_DEVICE_NAME "MMA8652FC"
 #define DISP_DEVICE_NAME "SSD16XX"
 
+const struct device *temp_humidity_device;
+const struct device *accelerometer_device;
+const struct device *display_device;
 
 void main(void)
 {
-	const struct device *temp_humidity_device;
-	const struct device *accelerometer_device;
-	const struct device *display_device;
-
 	temp_humidity_device = device_get_binding(TEMP_DEVICE_NAME);
 	if (temp_humidity_device == NULL) {
 		printk("Failed to initialize Temperature & Humidity device... aborting!\n");
