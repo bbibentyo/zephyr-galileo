@@ -5,8 +5,8 @@
 #include <drivers/sensor.h>
 #include <drivers/gpio.h>
 
+#include "cfb_image.h"
 #include "display.h"
-//#include "cfb_image.h"
 
 #define TEMP_DEVICE_NAME "HDC1010"
 #define ACCE_DEVICE_NAME "MMA8652FC"
@@ -62,13 +62,19 @@ void main(void)
 		sensor_sample_fetch(accelerometer_device);
 		sensor_channel_get(accelerometer_device, SENSOR_CHAN_ACCEL_XYZ, coord);
 
-		cfb_framebuffer_clear(display_device, false);
-		
+		cfb_framebuffer_clear(display_device, true);
+
+		cfb_framebuffer_set_font(display_device, 0);
+		cfb_print(display_device, "1", 0, LINE_HEIGHT);
+	
+		cfb_framebuffer_set_font(display_device, 2);
 		write_name_to_screen(display_device, name);
+		cfb_framebuffer_set_font(display_device, 1);
 		write_separator(display_device);
 		write_temp_to_screen(display_device, &temp);
 		write_humidity_to_screen(display_device, &humidity);
-		write_coordinates_to_screen(display_device, coord);
+		write_coordinates_to_screen(display_device, coord);	
+
 		cfb_framebuffer_finalize(display_device);
 
 		k_sleep(K_SECONDS(15));
