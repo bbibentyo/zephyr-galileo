@@ -6,7 +6,7 @@
 #include <drivers/gpio.h>
 
 #include "display.h"
-// #include <lvgl.h>
+//#include "cfb_image.h"
 
 #define TEMP_DEVICE_NAME "HDC1010"
 #define ACCE_DEVICE_NAME "MMA8652FC"

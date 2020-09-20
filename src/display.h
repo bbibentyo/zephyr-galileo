@@ -2,7 +2,7 @@
 #include <display/cfb.h>
 
 const uint8_t NAME_STARTING_INDEX = 60;
-const uint8_t RIGHT_SIDE_STARTING_INDEX = 135;
+const uint8_t RIGHT_SIDE_STARTING_INDEX = 120;
 const uint8_t CHAR_LENGTH = 15;
 
 /*
