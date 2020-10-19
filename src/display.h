@@ -20,7 +20,6 @@ uint32_t get_first_two_digits(uint32_t value) {
     return remainder;
 }
 
-
 void write_name_to_screen(const struct device *dev, char *name) {
     printk("writing name \"%s\" to display\n", name);
     cfb_print(dev, name, NAME_STARTING_INDEX, 0);
@@ -40,12 +39,25 @@ void write_humidity_to_screen(const struct device *dev, struct sensor_value *hum
     cfb_print(dev, humidity, RIGHT_SIDE_STARTING_INDEX, LINE_HEIGHT + 16);
 }
 
+char * dump_to_json(struct sensor_value *temp, struct sensor_value *hum, struct sensor_value coord[3]) {
+	char *buf = k_malloc(100);
+	char *template = "{\"temp\": %d.%d, \"Hum\": %d.%d, \"X\": %d.%d, \"Y\": %d.%d, \"Z\": %d.%d}";
+    sprintf(buf, template, 
+            temp->val1, get_first_two_digits(temp->val2), 
+            hum->val1, get_first_two_digits(hum->val2),
+            coord[0].val1, get_first_two_digits(coord[0].val2),
+            coord[1].val1, get_first_two_digits(coord[1].val2),
+            coord[2].val1, get_first_two_digits(coord[2].val2)
+    );
+    return buf;
+}
+
 void write_coordinates_to_screen(const struct device *dev, struct sensor_value coord[3]) {
     char x[CHAR_LENGTH], y[CHAR_LENGTH], z[CHAR_LENGTH];
     sprintf(x, "AX  : %02d.%d", coord[0].val1, get_first_two_digits(coord[0].val2));
     sprintf(y, "AY  : %02d.%d", coord[1].val1, get_first_two_digits(coord[1].val2));
     sprintf(z, "AZ  : %02d.%d", coord[2].val1, get_first_two_digits(coord[2].val2));
-    printk("AX = %d.%d, AY = %d.%d, AZ = %d.%d", 
+    printk("AX = %d.%d, AY = %d.%d, AZ = %d.%d\n", 
             coord[0].val1, coord[0].val2,
             coord[1].val1, coord[1].val2,
             coord[2].val1, coord[2].val2);

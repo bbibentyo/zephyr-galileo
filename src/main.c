@@ -1,12 +1,18 @@
 #include <stdio.h>
+#include <linker/sections.h>
+#include <errno.h>
 #include <zephyr.h>
 #include <sys/printk.h>
 #include <device.h>
 #include <drivers/sensor.h>
 #include <drivers/gpio.h>
+#include <logging/log.h>
+
+LOG_MODULE_REGISTER(galileo, LOG_LEVEL_INF);
 
 #include "cfb_image.h"
 #include "display.h"
+#include "http_util.h"
 
 #define TEMP_DEVICE_NAME "HDC1010"
 #define ACCE_DEVICE_NAME "MMA8652FC"
@@ -16,8 +22,20 @@ const struct device *temp_humidity_device;
 const struct device *accelerometer_device;
 const struct device *display_device;
 
+void post_data(struct sensor_value *temp, struct sensor_value *hum, struct sensor_value coord[3]) {
+	char *json_data = dump_to_json(temp, hum, coord);
+	printf("%s\n", json_data);
+	int response;
+	response = post_sensor_data(json_data);
+	LOG_INF("sensor data posted: %d", response);
+	k_free(json_data);
+}
+
+static struct net_mgmt_event_callback mgmt_cb;
+
 void main(void)
 {
+
 	temp_humidity_device = device_get_binding(TEMP_DEVICE_NAME);
 	if (temp_humidity_device == NULL) {
 		printk("Failed to initialize Temperature & Humidity device... aborting!\n");
@@ -46,6 +64,8 @@ void main(void)
 		}
 		display_blanking_off(display_device);
 	}
+
+	bool server_status = ping_http_server() >= 0;
 	
 	struct sensor_value temp;
 	struct sensor_value humidity;
@@ -74,9 +94,14 @@ void main(void)
 		write_temp_to_screen(display_device, &temp);
 		write_humidity_to_screen(display_device, &humidity);
 		write_coordinates_to_screen(display_device, coord);	
-
 		cfb_framebuffer_finalize(display_device);
 
-		k_sleep(K_SECONDS(15));
+		if (server_status) {
+			post_data(&temp, &humidity, coord);
+		} else {
+			LOG_ERR("HTTP server is offline... skipping POST request\n");
+		}
+		
+		k_sleep(K_SECONDS(30));
 	}
 }
