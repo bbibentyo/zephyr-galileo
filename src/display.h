@@ -1,6 +1,8 @@
 #include <drivers/sensor.h>
 #include <display/cfb.h>
 
+#define DEVICE_NAME "Zephyr Gateway"
+
 const uint8_t NAME_STARTING_INDEX = 40;
 const uint8_t RIGHT_SIDE_STARTING_INDEX = 120;
 const uint8_t CHAR_LENGTH = 15;
@@ -41,13 +43,14 @@ void write_humidity_to_screen(const struct device *dev, struct sensor_value *hum
 
 char * dump_to_json(struct sensor_value *temp, struct sensor_value *hum, struct sensor_value coord[3]) {
 	char *buf = k_malloc(100);
-	char *template = "{\"temp\": %d.%d, \"Hum\": %d.%d, \"X\": %d.%d, \"Y\": %d.%d, \"Z\": %d.%d}";
+	char *template = "{\"Temp\": %d.%d, \"Hum\": %d.%d, \"X\": %d.%d, \"Y\": %d.%d, \"Z\": %d.%d, \"device\": \"%s\"}";
     sprintf(buf, template, 
             temp->val1, get_first_two_digits(temp->val2), 
             hum->val1, get_first_two_digits(hum->val2),
             coord[0].val1, get_first_two_digits(coord[0].val2),
             coord[1].val1, get_first_two_digits(coord[1].val2),
-            coord[2].val1, get_first_two_digits(coord[2].val2)
+            coord[2].val1, get_first_two_digits(coord[2].val2),
+            DEVICE_NAME
     );
     return buf;
 }

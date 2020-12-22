@@ -5,6 +5,8 @@
 #include <net/net_mgmt.h>
 #include <device.h>
 
+static struct net_mgmt_event_callback mgmt_cb;
+
 static void dhcp_handler(struct net_mgmt_event_callback *cb, 
 							uint32_t mgmt_event, 
 							struct net_if *iface){

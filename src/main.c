@@ -13,6 +13,7 @@ LOG_MODULE_REGISTER(galileo, LOG_LEVEL_INF);
 #include "cfb_image.h"
 #include "display.h"
 #include "http_util.h"
+#include "dhcp_config.h"
 
 #define TEMP_DEVICE_NAME "HDC1010"
 #define ACCE_DEVICE_NAME "MMA8652FC"
@@ -22,19 +23,27 @@ const struct device *temp_humidity_device;
 const struct device *accelerometer_device;
 const struct device *display_device;
 
+char* convert_to_string(struct sensor_value *temp, struct sensor_value *hum){
+	char *buf = k_malloc(100);
+	char *values = "\"0x0001,%d.%d,%d.%d,1,0x0002:11\"";
+	sprintf(buf, values, temp->val1, temp->val2, hum->val1, hum->val2);
+	return buf;
+}
+
 void post_data(struct sensor_value *temp, struct sensor_value *hum, struct sensor_value coord[3]) {
-	char *json_data = dump_to_json(temp, hum, coord);
-	printf("%s\n", json_data);
+	// char *json_data = dump_to_json(temp, hum, coord);
+	char *json_data = convert_to_string(temp, hum);
+	LOG_INF("sensor values posted: %s", json_data);
 	int response;
 	response = post_sensor_data(json_data);
-	LOG_INF("sensor data posted: %d", response);
+	LOG_INF("---------- data posted ---------");
 	k_free(json_data);
 }
 
-static struct net_mgmt_event_callback mgmt_cb;
-
 void main(void)
 {
+	LOG_INF("Initializing DHCP to obtain IP address");
+	initialize_dhcp();
 
 	temp_humidity_device = device_get_binding(TEMP_DEVICE_NAME);
 	if (temp_humidity_device == NULL) {
@@ -96,12 +105,8 @@ void main(void)
 		write_coordinates_to_screen(display_device, coord);	
 		cfb_framebuffer_finalize(display_device);
 
-		if (server_status) {
-			post_data(&temp, &humidity, coord);
-		} else {
-			LOG_ERR("HTTP server is offline... skipping POST request\n");
-		}
+		post_data(&temp, &humidity, coord);
 		
-		k_sleep(K_SECONDS(30));
+		k_sleep(K_SECONDS(10));
 	}
 }

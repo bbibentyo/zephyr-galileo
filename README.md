@@ -31,6 +31,11 @@ You should see the led light in the middle of the board blink, if all was succes
 
 You can repeat the process with another sample project. If you want to try writing something to board display, try *samples/display/cfb_custom_font* sample project.
 
+### Building code requiring Internet connection via link board
+Attach the reel board to link board and connect the network cable to link board. see attached picture.
+
+`west build -- DSHIELD=link_board_eth`
+
 ## Connecting to device to obtain output
 You can use serial connection to obtain print and other log messages from the board. 
 On Ubuntu, I use `tio` command which you can install using `sudo apt install -y tio`. Once installed check which input your device is mounted to, by running `ls -l /dev/ttyACM*`... On my computer it is mounted to `/dev/ttyACM1`.
